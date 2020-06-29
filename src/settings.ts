@@ -37,6 +37,10 @@ export class TileSettings extends TileCollectionFormatSettings.TileSettings{
 
 export class TextSettings extends TileCollectionFormatSettings.TextSettings{
 }
+export class TextPrimarySettings extends TileCollectionFormatSettings.TextPrimarySettings{
+}
+export class TextSecondarySettings extends TileCollectionFormatSettings.TextSecondarySettings{
+}
 
 export class IconSettings extends TileCollectionFormatSettings.IconSettings{
 }
@@ -49,44 +53,6 @@ export class EffectSettings extends TileCollectionFormatSettings.EffectSettings{
 
 export class ContentSettings{
   public multiselect: boolean = false
-  public source: ContentSource = ContentSource.databound
-
-  public n: number = 5
-  public icons: boolean = false
-  public text1: string = "Text"
-  public icon1: string = ""
-  public text2: string = "Text"
-  public icon2: string = ""
-  public text3: string = "Text"
-  public icon3: string = ""
-  public text4: string = "Text"
-  public icon4: string = ""
-  public text5: string = "Text"
-  public icon5: string = ""
-  public text6: string = "Text"
-  public icon6: string = ""
-  public text7: string = "Text"
-  public icon7: string = ""
-  public text8: string = "Text"
-  public icon8: string = ""
-  public text9: string = "Text"
-  public icon9: string = ""
-  public text10: string = "Text"
-  public icon10: string = ""
-}
-
-export class BgImgSettings{
-  public bgimgs: boolean = false
-  public img1: string = ""
-  public img2: string = ""
-  public img3: string = ""
-  public img4: string = ""
-  public img5: string = ""
-  public img6: string = ""
-  public img7: string = ""
-  public img8: string = ""
-  public img9: string = ""
-  public img10: string = ""
 }
 
 export class MeasuresSettings{
@@ -127,10 +93,11 @@ export class MeasuresSettings{
 export class VisualSettings extends DataViewObjectsParser {
   public tile: TileSettings = new TileSettings();
   public text: TextSettings = new TextSettings();
+  public textPrimary: TextPrimarySettings = new TextPrimarySettings();
+  public textSecondary: TextSecondarySettings = new TextSecondarySettings();
   public icon: IconSettings = new IconSettings();
   public layout: LayoutSettings = new LayoutSettings();
   public effects: EffectSettings = new EffectSettings();
   public content: ContentSettings = new ContentSettings();
-  public bgimg: BgImgSettings = new BgImgSettings();
   public measures: MeasuresSettings = new MeasuresSettings();
 }
