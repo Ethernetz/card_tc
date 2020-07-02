@@ -62,7 +62,7 @@ import { ContentSource } from './enums'
 import { select, merge } from "d3";
 
 
-import { GenericsCollection, GenericData } from './GenericsCollection'
+import { CardsCollection, CardData } from './CardsCollection'
 import { ContentFormatType } from "./TilesCollection/enums";
 
 export class Visual implements IVisual {
@@ -189,7 +189,6 @@ export class Visual implements IVisual {
             return
         this.visualSettings = VisualSettings.parse(options.dataViews[0]) as VisualSettings
 
-
         let objects: powerbi.VisualObjectInstancesToPersist = getObjectsToPersist(this.visualSettings)
         if (objects.merge.length != 0)
             this.host.persistProperties(objects);
@@ -200,61 +199,80 @@ export class Visual implements IVisual {
             .style('height', options.viewport.height)
 
 
-        let genericsCollection = new GenericsCollection()
+        let cardsCollection = new CardsCollection()
 
-        genericsCollection.formatSettings.tile = this.visualSettings.tile
-        genericsCollection.formatSettings.text = this.visualSettings.text
-        genericsCollection.formatSettings.textPrimary = this.visualSettings.textPrimary
-        genericsCollection.formatSettings.textSecondary = this.visualSettings.textSecondary
-        genericsCollection.formatSettings.icon = this.visualSettings.icon
-        genericsCollection.formatSettings.layout = this.visualSettings.layout
-        genericsCollection.formatSettings.effect = this.visualSettings.effects
+        cardsCollection.formatSettings.icon = this.visualSettings.icon
+        cardsCollection.formatSettings.layout = this.visualSettings.layout
+        cardsCollection.formatSettings.effect = this.visualSettings.effects
 
 
-        genericsCollection.container = this.container
-        genericsCollection.viewport = {
+        cardsCollection.container = this.container
+        cardsCollection.viewport = {
             height: options.viewport.height,
             width: options.viewport.width,
         }
-        genericsCollection.visual = this
-        genericsCollection.options = options
+        cardsCollection.visual = this
+        cardsCollection.options = options
         let dataView = options.dataViews[0]
         let categories: powerbi.DataViewCategoryColumn[] = dataView.categorical.categories;
         let measures: powerbi.DataViewValueColumn[] = dataView.categorical.values
         let selectionIdKeys: string[] = (this.selectionManager.getSelectionIds() as powerbi.visuals.ISelectionId[]).map(x => x.getKey()) as string[]
 
 
+        if (categories) {
+            this.visualSettings.layout.tileLayout = TileLayoutType.grid
+            this.visualSettings.layout.rowLength = measures.length + 1
+            cardsCollection.hasCategory = true
+        }
+
+        let categoryInstanceSelectionIds: powerbi.visuals.ISelectionId[] = []
+
         for (let i = 0; i < measures.length; i++) {
             let iValueFormatter = valueFormatter.create({ format: measures[i].source.format });
-            // console.log("format is", measures[i].source)
             for (let j = 0; j < measures[i].values.length; j++) {
                 if (categories) {
-                    if(i==0){
-                        genericsCollection.tilesData[j*(measures.length+1)+i] = {
+                    if (i == 0) {
+                        let categoryInstanceId = this.host.createSelectionIdBuilder()
+                            .withCategory(categories[0], j)
+                            .createSelectionId();
+                        categoryInstanceSelectionIds[j] = categoryInstanceId
+
+                        cardsCollection.tilesData[j * (measures.length + 1) + i] = {
                             text: categories[0].values[j].toString(),
+                            selectionId: categoryInstanceSelectionIds[j],
+                            get isSelected(): boolean{
+                                return this.selectionId &&
+                                selectionIdKeys &&
+                                selectionIdKeys.indexOf(this.selectionId.getKey() as string) > -1
+                            }
                         }
                     }
-                    genericsCollection.tilesData[j*(measures.length + 1) + i + 1] = {
+                    cardsCollection.tilesData[j * (measures.length + 1) + i + 1] = {
                         text: measures[i].source.displayName,
-                        textSecondary: iValueFormatter.format(measures[i].values[j]),
-                        contentFormatType: ContentFormatType.text_textSecondary
+                        text2: iValueFormatter.format(measures[i].values[j]),
+                        contentFormatType: ContentFormatType.text_text2,
+                        selectionId: categoryInstanceSelectionIds[j],
+                        get isSelected(): boolean{
+                            return this.selectionId &&
+                            selectionIdKeys &&
+                            selectionIdKeys.indexOf(this.selectionId.getKey() as string) > -1
+                        }
                     }
 
                 } else {
-                    genericsCollection.tilesData[j * measures.length + i] = {
+                    cardsCollection.tilesData[j * measures.length + i] = {
                         text: measures[i].source.displayName,
-                        textSecondary: iValueFormatter.format(measures[i].values[j]),
-                        contentFormatType: ContentFormatType.text_textSecondary
+                        text2: iValueFormatter.format(measures[i].values[j]),
+                        contentFormatType: ContentFormatType.text_text2,
+                        isSelected: this.selectionManagerUnbound.getSelectionIndexes().indexOf(i) > -1,
                     }
                 }
 
             }
         }
-        if(categories){
-                this.visualSettings.layout.tileLayout = TileLayoutType.grid
-                this.visualSettings.layout.rowLength = measures.length + 1
-            }
-        genericsCollection.render()
+
+
+        cardsCollection.render()
     }
 
     private static parseSettings(dataView: DataView): VisualSettings {
