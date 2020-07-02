@@ -36,7 +36,6 @@ export class CardsCollection extends TilesCollection {
 export class Card extends Tile {
     collection = <CardsCollection>this.collection
     tilesData = <CardData[]>this.tilesData
-    // tileData = <CardData>this.tileData
     visual: Visual = this.collection.visual
     
 

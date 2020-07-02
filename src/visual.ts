@@ -229,22 +229,23 @@ export class Visual implements IVisual {
 
         for (let i = 0; i < measures.length; i++) {
             let iValueFormatter = valueFormatter.create({ format: measures[i].source.format });
-            for (let j = 0; j < measures[i].values.length; j++) {
-                if (categories) {
+            if (categories) {
+                for (let j = 0; j < categories[0].values.length; j++) {
                     if (i == 0) {
                         let categoryInstanceId = this.host.createSelectionIdBuilder()
                             .withCategory(categories[0], j)
                             .createSelectionId();
                         categoryInstanceSelectionIds[j] = categoryInstanceId
 
-                        cardsCollection.tilesData[j * (measures.length + 1) + i] = {
+                        cardsCollection.tilesData[j * (measures.length + 1)] = {
                             text: categories[0].values[j].toString(),
                             selectionId: categoryInstanceSelectionIds[j],
-                            get isSelected(): boolean{
+                            get isSelected(): boolean {
                                 return this.selectionId &&
-                                selectionIdKeys &&
-                                selectionIdKeys.indexOf(this.selectionId.getKey() as string) > -1
-                            }
+                                    selectionIdKeys &&
+                                    selectionIdKeys.indexOf(this.selectionId.getKey() as string) > -1
+                            },
+                            isHovered: this.hoveredIndex == j * (measures.length + 1),
                         }
                     }
                     cardsCollection.tilesData[j * (measures.length + 1) + i + 1] = {
@@ -252,22 +253,22 @@ export class Visual implements IVisual {
                         text2: iValueFormatter.format(measures[i].values[j]),
                         contentFormatType: ContentFormatType.text_text2,
                         selectionId: categoryInstanceSelectionIds[j],
-                        get isSelected(): boolean{
+                        get isSelected(): boolean {
                             return this.selectionId &&
-                            selectionIdKeys &&
-                            selectionIdKeys.indexOf(this.selectionId.getKey() as string) > -1
-                        }
-                    }
-
-                } else {
-                    cardsCollection.tilesData[j * measures.length + i] = {
-                        text: measures[i].source.displayName,
-                        text2: iValueFormatter.format(measures[i].values[j]),
-                        contentFormatType: ContentFormatType.text_text2,
-                        isSelected: this.selectionManagerUnbound.getSelectionIndexes().indexOf(i) > -1,
+                                selectionIdKeys &&
+                                selectionIdKeys.indexOf(this.selectionId.getKey() as string) > -1
+                        },
+                        isHovered: this.hoveredIndex == j * (measures.length + 1) + i + 1
                     }
                 }
-
+            } else {
+                cardsCollection.tilesData[i] = {
+                    text: measures[i].source.displayName,
+                    text2: iValueFormatter.format(measures[i].values[0]),
+                    contentFormatType: ContentFormatType.text_text2,
+                    isHovered: this.hoveredIndex == i,
+                    isSelected: this.selectionManagerUnbound.getSelectionIndexes().indexOf(i) > -1,
+                }
             }
         }
 
