@@ -88,6 +88,11 @@ export class Card extends Tile {
             return getMatchingStateProperty(this.currentState, this.vs.categoryLabelText, 'fontFamily')
         return getMatchingStateProperty(this.currentState, this.vs.categoryLabelText, 'fontFamily')
     }
+    get textAlign(): string {
+        if(this.contentFormatType == ContentFormatType.text_text2)
+            return getMatchingStateProperty(this.currentState, this.vs.categoryLabelText, 'alignment')
+        return getMatchingStateProperty(this.currentState, this.vs.categoryLabelText, 'alignment')
+    }
 
     get text2Color(): string {
         return getMatchingStateProperty(this.currentState, this.visual.visualSettings.dataLabelText, 'color')
@@ -100,6 +105,9 @@ export class Card extends Tile {
     }
     get font2Family(): string {
         return getMatchingStateProperty(this.currentState, this.visual.visualSettings.dataLabelText, 'fontFamily')
+    }
+    get text2Align(): string {
+        return getMatchingStateProperty(this.currentState, this.visual.visualSettings.dataLabelText, 'alignment')
     }
 
 

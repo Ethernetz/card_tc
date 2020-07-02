@@ -188,7 +188,6 @@ export class Visual implements IVisual {
         if (!(options && options.dataViews && options.dataViews[0]))
             return
         this.visualSettings = VisualSettings.parse(options.dataViews[0]) as VisualSettings
-
         let objects: powerbi.VisualObjectInstancesToPersist = getObjectsToPersist(this.visualSettings)
         if (objects.merge.length != 0)
             this.host.persistProperties(objects);

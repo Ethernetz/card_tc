@@ -107,11 +107,11 @@ export class Tile {
     get font2Family(): string {
         return getMatchingStateProperty(this.currentState, this.formatSettings.text, 'fontFamily')
     }
+    get text2Align(): string {
+        return getMatchingStateProperty(this.currentState, this.formatSettings.text, 'alignment')
+    }
 
-    // get widthSpaceForAllText(): number {
-    //     let totalPadding = (this.tilesInRow - 1) * this.formatSettings.layout.padding;
-    //     return this.viewportWidth - totalPadding - ProcessedVisualSettings.totalTextHmargin;
-    // }
+
     get allTextWidth(): number {
         return calculateWordDimensions(this.rowText.join(""), this.fontFamily, this.fontSize + "pt").width
     }

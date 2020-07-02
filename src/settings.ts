@@ -29,59 +29,28 @@
 import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
 import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 import * as TileCollectionFormatSettings from "./TilesCollection/FormatSettings"
-import {AlignmentType, State} from './TilesCollection/enums'
 
 export class MeasureTileSettings extends TileCollectionFormatSettings.TileSettings{
-    public colorA: string = "";
-    public colorS: string = "#fff";
-    public colorU: string = "#fff";
-    public colorH: string = "#fff";
+    public colorD: string = "#fff";
 }
 
 export class CategoryTileSettings extends TileCollectionFormatSettings.TileSettings{
-  public colorA: string = "";
-  public colorS: string = "#fff";
-  public colorU: string = "#fff";
-  public colorH: string = "#fff";
+  public colorD: string = "#fff";
 }
 
 export class HeaderTextSettings extends TileCollectionFormatSettings.TextSettings{
-    public colorA: string = "";
-    public colorS: string = "#252423";
-    public colorU: string = "#252423";
-    public colorH: string = "#252423";
-    public fontSizeA: number = null;
-    public fontSizeS: number = 20;
-    public fontSizeU: number = 20;
-    public fontSizeH: number = 20;
+    public colorD: string = "#252423";
+    public fontSizeD: number = 20;
 }
 export class CategoryLabelTextSettings extends TileCollectionFormatSettings.TextSettings{
-  public colorA: string = "";
-    public colorS: string = "#666666";
-    public colorU: string = "#666666";
-    public colorH: string = "#666666";
-    public fontSizeA: number = null;
-    public fontSizeS: number = 12;
-    public fontSizeU: number = 12;
-    public fontSizeH: number = 12;
-    public fontFamilyA: string = "";
-    public fontFamilyS: string = "Segoe UI";
-    public fontFamilyU: string = "Segoe UI";
-    public fontFamilyH: string = "Segoe UI";
+    public colorD: string = "#666666";
+    public fontSizeD: number = 12;
+    public fontFamilyD: string = "Segoe UI";
 }
 export class DataLabelTextSettings extends TileCollectionFormatSettings.TextSettings{
-  public colorA: string = "";
-    public colorS: string = "#252423";
-    public colorU: string = "#252423";
-    public colorH: string = "#252423";
-  public fontSizeA: number = null;
-    public fontSizeS: number = 45;
-    public fontSizeU: number = 45;
-    public fontSizeH: number = 45;
-    public fontFamilyA: string = "";
-    public fontFamilyS: string = "Segoe UI";
-    public fontFamilyU: string = "Segoe UI";
-    public fontFamilyH: string = "Segoe UI";
+    public colorD: string = "#252423";
+    public fontSizeD: number = 45;
+    public fontFamilyD: string = "Segoe UI";
 }
 
 export class IconSettings extends TileCollectionFormatSettings.IconSettings{

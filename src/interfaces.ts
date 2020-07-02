@@ -1,17 +1,11 @@
-import powerbi from "powerbi-visuals-api";
 import {State} from './TilesCollection/enums'
-import { SelectionManagerUnbound } from "./SelectionManagerUnbound";
-
-
-interface DatapointCommon {
-    value: powerbi.PrimitiveValue,
-}
 
 export interface propertyStateName {
     all: string,
     selected: string,
     unselected: string,
     hover: string
+    default: string
 }
 
 export interface propertyStateValue {
@@ -19,6 +13,7 @@ export interface propertyStateValue {
     selected: string | number,
     unselected: string | number,
     hover: string | number,
+    default: string | number
 }
 
 export interface propertyStatesInput extends propertyStateValue {

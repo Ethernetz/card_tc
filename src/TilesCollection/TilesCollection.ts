@@ -148,7 +148,6 @@ export class TilesCollection {
             .style("display", "table-cell")
             .style("vertical-align", "middle")
             .html("")
-            .style("text-align", function (d) { return d.textAlign })
             .append(function (d) { return d.content })
         
 
@@ -157,12 +156,14 @@ export class TilesCollection {
             .style("font-size", function (d) { return d.fontSize + "pt" })
             .style("font-family", function (d) { return d.fontFamily })
             .style("color", function (d) { return d.textColor })
+            .style("text-align", function (d) { return d.textAlign })
         
         contentFO.select('.text2Container')
             .style("opacity", function (d) { return d.text2Opacity })
             .style("font-size", function (d) { return d.font2Size + "pt" })
             .style("font-family", function (d) { return d.font2Family })
             .style("color", function (d) { return d.text2Color })
+            .style("text-align", function (d) {return d.text2Align })
 
 
 
