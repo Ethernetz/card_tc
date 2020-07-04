@@ -130,6 +130,9 @@ export class Tile {
     get boundedTextHeight(): number {
         return calculateWordDimensions(this.text as string, this.fontFamily, this.fontSize + "pt", this.textContainerWidthType, (this.maxInlineTextWidth) + 'px').height;
     }
+    get maxBoundedTextHeight(): number{
+        return this.collection.maxBoundedTextHeight
+    }
 
     get beforeInRowText(): string[] {
         return this.rowText.slice(0, this.indexInRow)
@@ -148,13 +151,15 @@ export class Tile {
     }
 
     get textContainerHeight(): number {
-        return this.boundedTextHeight + this.textBmargin
+        return this.maxBoundedTextHeight + this.textBmargin
     }
     get contentContainerWidth(): number {
         return this.shape.contentBoundingBox.width
     }
     get widthTakenByIcon(): number {
-        return this.iconWidth + this.iconHmargin
+        if(this.iconPlacement == IconPlacement.left)
+            return this.iconWidth + this.iconHmargin
+        return 0
     }
     get maxInlineTextWidth(): number {
         return this.widthSpaceForText - this.widthTakenByIcon

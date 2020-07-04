@@ -49,7 +49,7 @@ import { valueFormatter } from "powerbi-visuals-utils-formattingutils"
 import * as d3 from "d3";
 // import { ProcessedVisualSettings } from "./processedvisualsettings";
 
-import { propertyStateName } from './interfaces'
+import { PropertyGroupKeys } from './TilesCollection/interfaces'
 import { getPropertyStateNameArr, getObjectsToPersist, getCorrectPropertyStateName } from './functions'
 import { SelectionManagerUnbound } from './SelectionManagerUnbound'
 
@@ -93,7 +93,6 @@ export class Visual implements IVisual {
             .append('svg')
             .classed('navigator', true);
 
-        // let defs = this.svg.append("defs");
         this.container = this.svg.append("g")
             .classed('container', true);
     }
@@ -103,9 +102,9 @@ export class Visual implements IVisual {
         let settingsKeys = Object.keys(settings)
         for (let i = 0; i < settingsKeys.length; i++) {
             let settingKey: string = settingsKeys[i]
-            let groupedKeyNamesArr: propertyStateName[] = getPropertyStateNameArr(Object.keys(settings[settingKey]))
+            let groupedKeyNamesArr: PropertyGroupKeys[] = getPropertyStateNameArr(Object.keys(settings[settingKey]))
             for (let j = 0; j < groupedKeyNamesArr.length; j++) {
-                let groupedKeyNames: propertyStateName = groupedKeyNamesArr[j]
+                let groupedKeyNames: PropertyGroupKeys = groupedKeyNamesArr[j]
                 switch (settings[settingKey].state) {
                     case State.all:
                         delete settings[settingKey][groupedKeyNames.selected]
