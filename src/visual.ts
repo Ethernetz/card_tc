@@ -50,7 +50,8 @@ import * as d3 from "d3";
 // import { ProcessedVisualSettings } from "./processedvisualsettings";
 
 import { PropertyGroupKeys } from './TilesCollection/interfaces'
-import { getPropertyStateNameArr, getObjectsToPersist, getCorrectPropertyStateName } from './TilesCollectionUtlities/functions'
+import { getPropertyStateNameArr, getObjectsToPersist } from './TilesCollectionUtlities/functions'
+import { getCorrectPropertyStateName } from './TilesCollection/functions'
 import { SelectionManagerUnbound } from './SelectionManagerUnbound'
 
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
@@ -188,11 +189,6 @@ export class Visual implements IVisual {
             this.host.persistProperties(objects);
 
 
-        this.svg
-            .style('width', options.viewport.width)
-            .style('height', options.viewport.height)
-
-
         let cardsCollection = new CardsCollection()
 
         cardsCollection.formatSettings.icon = this.visualSettings.icon
@@ -201,6 +197,7 @@ export class Visual implements IVisual {
 
 
         cardsCollection.container = this.container
+        cardsCollection.svg = this.svg
         cardsCollection.viewport = {
             height: options.viewport.height,
             width: options.viewport.width,
