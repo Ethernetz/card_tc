@@ -46,25 +46,25 @@ export class Card extends Tile {
     get tileFill(): string{
         if(this.contentFormatType == ContentFormatType.text_text2)
             return getMatchingStateProperty(this.currentState, this.vs.measureTile, 'color')
-        return getMatchingStateProperty(this.currentState, this.vs.categoryTile, 'color')
+        return getMatchingStateProperty(this.currentState, this.vs.headerTile, 'color')
     }
 
     get tileFillOpacity(): number {
         if(this.contentFormatType == ContentFormatType.text_text2)
             return 1 - getMatchingStateProperty(this.currentState, this.vs.measureTile, 'transparency') / 100
-        return 1 - getMatchingStateProperty(this.currentState, this.vs.categoryTile, 'transparency') / 100
+        return 1 - getMatchingStateProperty(this.currentState, this.vs.headerTile, 'transparency') / 100
     }
 
     get tileStroke(): string {
         if(this.contentFormatType == ContentFormatType.text_text2)
             return getMatchingStateProperty(this.currentState, this.vs.measureTile, 'stroke')
-        return getMatchingStateProperty(this.currentState, this.vs.categoryTile, 'stroke')
+        return getMatchingStateProperty(this.currentState, this.vs.headerTile, 'stroke')
     }
 
     get tileStrokeWidth(): number {
         if(this.contentFormatType == ContentFormatType.text_text2)
             return getMatchingStateProperty(this.currentState, this.vs.measureTile, 'strokeWidth')
-        return getMatchingStateProperty(this.currentState, this.vs.categoryTile, 'strokeWidth')
+        return getMatchingStateProperty(this.currentState, this.vs.headerTile, 'strokeWidth')
     }
 
 
@@ -86,12 +86,22 @@ export class Card extends Tile {
     get fontFamily(): string {
         if(this.contentFormatType == ContentFormatType.text_text2)
             return getMatchingStateProperty(this.currentState, this.vs.categoryLabelText, 'fontFamily')
-        return getMatchingStateProperty(this.currentState, this.vs.categoryLabelText, 'fontFamily')
+        return getMatchingStateProperty(this.currentState, this.vs.headerText, 'fontFamily')
     }
     get textAlign(): string {
         if(this.contentFormatType == ContentFormatType.text_text2)
             return getMatchingStateProperty(this.currentState, this.vs.categoryLabelText, 'alignment')
-        return getMatchingStateProperty(this.currentState, this.vs.categoryLabelText, 'alignment')
+        return getMatchingStateProperty(this.currentState, this.vs.headerText, 'alignment')
+    }
+    get textMarginLeft(): number {
+        if(this.contentFormatType == ContentFormatType.text_text2)
+            return getMatchingStateProperty(this.currentState, this.vs.categoryLabelText, 'marginLeft')
+        return getMatchingStateProperty(this.currentState, this.vs.headerText, 'marginLeft')
+    }
+    get textMarginRight(): number {
+        if(this.contentFormatType == ContentFormatType.text_text2)
+            return getMatchingStateProperty(this.currentState, this.vs.categoryLabelText, 'marginRight')
+        return getMatchingStateProperty(this.currentState, this.vs.headerText, 'marginRight')
     }
 
     get text2Color(): string {
@@ -109,6 +119,12 @@ export class Card extends Tile {
     get text2Align(): string {
         return getMatchingStateProperty(this.currentState, this.visual.visualSettings.dataLabelText, 'alignment')
     }
+    get text2MarginLeft(): number {
+        return getMatchingStateProperty(this.currentState, this.visual.visualSettings.dataLabelText, 'marginLeft')
+    }
+    get text2MarginRight(): number {
+        return getMatchingStateProperty(this.currentState, this.visual.visualSettings.dataLabelText, 'marginRight')
+    }
 
 
     onTileClick() {
@@ -122,13 +138,13 @@ export class Card extends Tile {
     onTileMouseover() {
         this.visual.hoveredIndex = this.i
         let vs = this.collection.visual.visualSettings
-        if(vs.measureTile.hoverStyling || vs.categoryTile.hoverStyling || vs.headerText.hoverStyling || vs.categoryLabelText.hoverStyling || vs.dataLabelText || vs.icon.hoverStyling || vs.effects.hoverStyling)
+        if(vs.measureTile.hoverStyling || vs.headerTile.hoverStyling || vs.headerText.hoverStyling || vs.categoryLabelText.hoverStyling || vs.dataLabelText || vs.icon.hoverStyling || vs.effects.hoverStyling)
             this.visual.update(this.collection.options)
     }
     onTileMouseout() {
         this.visual.hoveredIndex = null
         let vs = this.collection.visual.visualSettings
-        if(vs.measureTile.hoverStyling || vs.categoryTile.hoverStyling || vs.headerText.hoverStyling || vs.categoryLabelText.hoverStyling || vs.dataLabelText || vs.icon.hoverStyling || vs.effects.hoverStyling)
+        if(vs.measureTile.hoverStyling || vs.headerTile.hoverStyling || vs.headerText.hoverStyling || vs.categoryLabelText.hoverStyling || vs.dataLabelText || vs.icon.hoverStyling || vs.effects.hoverStyling)
             this.visual.update(this.collection.options)
     }
 }

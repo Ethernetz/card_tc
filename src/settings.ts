@@ -34,7 +34,7 @@ export class MeasureTileSettings extends TileCollectionFormatSettings.TileSettin
     public colorD: string = "#fff";
 }
 
-export class CategoryTileSettings extends TileCollectionFormatSettings.TileSettings{
+export class HeaderTileSettings extends TileCollectionFormatSettings.TileSettings{
   public colorD: string = "#fff";
 }
 
@@ -68,11 +68,11 @@ export class ContentSettings{
 
 export class VisualSettings extends DataViewObjectsParser {
   public measureTile: MeasureTileSettings = new MeasureTileSettings();
-  public categoryTile: CategoryTileSettings = new CategoryTileSettings();
-
-  public headerText: HeaderTextSettings = new HeaderTextSettings();
   public categoryLabelText: CategoryLabelTextSettings = new CategoryLabelTextSettings();
   public dataLabelText: DataLabelTextSettings = new DataLabelTextSettings();
+  
+  public headerTile: HeaderTileSettings = new HeaderTileSettings();
+  public headerText: HeaderTextSettings = new HeaderTextSettings();
 
   public icon: IconSettings = new IconSettings();
   public layout: LayoutSettings = new LayoutSettings();
