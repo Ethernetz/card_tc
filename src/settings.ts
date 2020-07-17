@@ -76,6 +76,6 @@ export class VisualSettings extends DataViewObjectsParser {
 
   public icon: IconSettings = new IconSettings();
   public layout: LayoutSettings = new LayoutSettings();
-  public effects: EffectSettings = new EffectSettings();
+  public effect: EffectSettings = new EffectSettings();
   public content: ContentSettings = new ContentSettings();
 }

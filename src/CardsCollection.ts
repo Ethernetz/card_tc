@@ -129,23 +129,20 @@ export class Card extends Tile {
 
     onTileClick() {
         if(this.collection.hasCategory)
-            this.visual.selectionManager.select((<CardData>this.tileData).selectionId, false)
+            this.visual.selectionManager.select((<CardData>this.tileData).selectionId, this.visual.visualSettings.content.multiselect)
         else
             this.visual.selectionManagerUnbound.select(this.i)
-        this.visual.update(this.collection.options)
+        this.collection.render(this.visual.createCardData()) 
     }
 
     onTileMouseover() {
         this.visual.hoveredIndex = this.i
-        let vs = this.collection.visual.visualSettings
-        if(vs.measureTile.hoverStyling || vs.headerTile.hoverStyling || vs.headerText.hoverStyling || vs.categoryLabelText.hoverStyling || vs.dataLabelText || vs.icon.hoverStyling || vs.effects.hoverStyling)
-            this.visual.update(this.collection.options)
+        this.collection.render(this.visual.createCardData()) 
     }
     onTileMouseout() {
         this.visual.hoveredIndex = null
         let vs = this.collection.visual.visualSettings
-        if(vs.measureTile.hoverStyling || vs.headerTile.hoverStyling || vs.headerText.hoverStyling || vs.categoryLabelText.hoverStyling || vs.dataLabelText || vs.icon.hoverStyling || vs.effects.hoverStyling)
-            this.visual.update(this.collection.options)
+        this.collection.render(this.visual.createCardData()) 
     }
 }
 
