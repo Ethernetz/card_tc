@@ -11,6 +11,7 @@ import * as d3 from "d3";
 import { getMatchingStateProperty } from "./TilesCollection/functions";
 import { ContentFormatType } from "./TilesCollection/enums";
 import { VisualSettings } from "./settings";
+import { UniversalTileData } from "./TilesCollection/UniversalTileData";
 
 // import { sizeTextContainer, styleText, makeTextTransparent } from './d3calls'
 
@@ -24,6 +25,10 @@ export class CardsCollection extends TilesCollection {
         return new Card(this, i, this.tilesData, this.formatSettings)
     }
 
+    public createUniversalTileData(): UniversalTileData {
+        return new UniversalCardData(this.tilesData, this.formatSettings, this)
+    }
+
 
     onShiftUp() {
         this.visual.shiftFired = false
@@ -32,6 +37,26 @@ export class CardsCollection extends TilesCollection {
     }
 
 }
+
+export class UniversalCardData extends UniversalTileData {
+    collection = <CardsCollection>this.collection
+    tilesData = <CardData[]>this.tilesData
+    visual: Visual = this.collection.visual
+
+    get vs(): VisualSettings{
+        return this.visual.visualSettings
+    }
+
+    get maxFontSize(): number{
+        return this.getMaxOfPropertyGroup(this.vs.categoryLabelText, 'fontSize')
+    }
+    get maxFont2Size(): number{
+        return this.getMaxOfPropertyGroup(this.vs.dataLabelText, 'fontSize')
+    }
+    
+}
+
+
 
 export class Card extends Tile {
     collection = <CardsCollection>this.collection
@@ -113,18 +138,6 @@ export class Card extends Tile {
     get font2Size(): number {
         return getMatchingStateProperty(this.currentState, this.visual.visualSettings.dataLabelText, 'fontSize')
     }
-    get font2Family(): string {
-        return getMatchingStateProperty(this.currentState, this.visual.visualSettings.dataLabelText, 'fontFamily')
-    }
-    get text2Align(): string {
-        return getMatchingStateProperty(this.currentState, this.visual.visualSettings.dataLabelText, 'alignment')
-    }
-    get text2MarginLeft(): number {
-        return getMatchingStateProperty(this.currentState, this.visual.visualSettings.dataLabelText, 'marginLeft')
-    }
-    get text2MarginRight(): number {
-        return getMatchingStateProperty(this.currentState, this.visual.visualSettings.dataLabelText, 'marginRight')
-    }
 
 
     onTileClick() {
@@ -132,17 +145,16 @@ export class Card extends Tile {
             this.visual.selectionManager.select((<CardData>this.tileData).selectionId, this.visual.visualSettings.content.multiselect)
         else
             this.visual.selectionManagerUnbound.select(this.i)
-        this.collection.render(this.visual.createCardData()) 
+        this.collection.onStateChange(this.visual.createCardData()) 
     }
 
     onTileMouseover() {
         this.visual.hoveredIndex = this.i
-        this.collection.render(this.visual.createCardData()) 
+        this.collection.onStateChange(this.visual.createCardData()) 
     }
     onTileMouseout() {
         this.visual.hoveredIndex = null
-        let vs = this.collection.visual.visualSettings
-        this.collection.render(this.visual.createCardData()) 
+        this.collection.onStateChange(this.visual.createCardData()) 
     }
 }
 

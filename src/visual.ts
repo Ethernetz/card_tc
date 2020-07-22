@@ -39,6 +39,7 @@ import VisualObjectInstancesToPersist = powerbi.VisualObjectInstancesToPersist
 import DataViewPropertyValue = powerbi.DataViewPropertyValue
 import VisualObjectInstance = powerbi.VisualObjectInstance
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject
+import VisualUpdateType = powerbi.VisualUpdateType
 
 
 import { VisualSettings } from "./settings";
@@ -84,20 +85,27 @@ export class Visual implements IVisual {
 
     public selectionIdKeys: string [] = []
 
+    public cardsCollection: CardsCollection
+
     constructor(options: VisualConstructorOptions) {
         this.selectionIdBuilder = options.host.createSelectionIdBuilder();
         this.selectionManager = options.host.createSelectionManager();
         this.selectionManagerUnbound = new SelectionManagerUnbound()
         this.selectionManagerHover = options.host.createSelectionManager();
         this.host = options.host;
-        this.visualElement = options.element
-
+        
         this.svg = d3.select(options.element)
             .append('svg')
-            .classed('slicer', true);
+            .classed('buttonstrip', true);
 
         this.container = this.svg.append("g")
             .classed('container', true);
+
+        this.cardsCollection = new CardsCollection()
+        this.cardsCollection.svg = this.svg
+        this.cardsCollection.container = this.container
+        this.cardsCollection.visual = this
+        this.cardsCollection.visualElement = options.element
     }
 
     public getEnumeratedStateProperties(propertyGroup: any, prefix?: string): { [propertyName: string]: DataViewPropertyValue } {
@@ -152,66 +160,59 @@ export class Visual implements IVisual {
                 properties = {...properties, ...this.getEnumeratedStateProperties(settings.headerTile) }
                 break
             case "categoryLabelText": {
+        
+                properties.show = settings.categoryLabelText.show
                 properties.state = settings.categoryLabelText.state
                 properties.hoverStyling = settings.categoryLabelText.hoverStyling
-                let iconPlacement = settings.icon[getCorrectPropertyStateName(settings.categoryLabelText.state, 'placement')] as IconPlacement
                 let filtered = Object.keys(settings.categoryLabelText)
-                    .filter(key => !(settings.icon.icons && iconPlacement != IconPlacement.above && key == "bmarginA"))
                     .reduce((obj, key) => {
                         obj[key] = settings.categoryLabelText[key]
                         return obj;
                     }, {})
 
-                properties = {...properties, ...this.getEnumeratedStateProperties(filtered) }
+                properties = { ...properties, ...this.getEnumeratedStateProperties(filtered) }
                 break
             }
             case "dataLabelText": {
+                properties.show = settings.dataLabelText.show
                 properties.state = settings.dataLabelText.state
                 properties.hoverStyling = settings.dataLabelText.hoverStyling
-                let iconPlacement = settings.icon[getCorrectPropertyStateName(settings.dataLabelText.state, 'placement')] as IconPlacement
                 let filtered = Object.keys(settings.dataLabelText)
-                    .filter(key => !(settings.icon.icons && iconPlacement != IconPlacement.above && key == "bmarginA"))
                     .reduce((obj, key) => {
                         obj[key] = settings.dataLabelText[key]
                         return obj;
                     }, {})
 
-                properties = {...properties, ...this.getEnumeratedStateProperties(filtered) }
+                properties = { ...properties, ...this.getEnumeratedStateProperties(filtered) }
                 break
             }
             case "headerText": {
+                properties.show = settings.headerText.show
                 properties.state = settings.headerText.state
                 properties.hoverStyling = settings.headerText.hoverStyling
-                let iconPlacement = settings.icon[getCorrectPropertyStateName(settings.headerText.state, 'placement')] as IconPlacement
                 let filtered = Object.keys(settings.headerText)
-                    .filter(key => !(settings.icon.icons && iconPlacement != IconPlacement.above && key == "bmarginA"))
                     .reduce((obj, key) => {
                         obj[key] = settings.headerText[key]
                         return obj;
                     }, {})
 
-                properties = {...properties, ...this.getEnumeratedStateProperties(filtered) }
+                properties = { ...properties, ...this.getEnumeratedStateProperties(filtered) }
                 break
             }
             case "icon":{
-                properties.icons = settings.icon.icons
-                let excludeWhenLeft = ["topMarginA", "bottomMarginA"]
-
-                if (settings.icon.icons) {
-                    let iconPlacement = settings.icon[getCorrectPropertyStateName(settings.icon.state, 'placement')] as IconPlacement
-                    properties.state = settings.icon.state
-                    properties.hoverStyling = settings.icon.hoverStyling
-                    let filtered = Object.keys(settings.icon)
-                        .filter(key => !(iconPlacement && excludeWhenLeft.indexOf(key) > -1))
-                        .reduce((obj, key) => {
-                            obj[key] = settings.icon[key]
-                            return obj;
-                        }, {})
+                properties.show = settings.icon.show
+                properties.state = settings.icon.state
+                properties.hoverStyling = settings.icon.hoverStyling
+                let filtered = Object.keys(settings.icon)
+                    .reduce((obj, key) => {
+                        obj[key] = settings.icon[key]
+                        return obj;
+                    }, {})
 
 
-                    properties = { ...properties, ...this.getEnumeratedStateProperties(filtered) }
-                }
-                break}
+                properties = { ...properties, ...this.getEnumeratedStateProperties(filtered) }
+                break
+            }
             case "layout": {
                 let excludeWhenNotFixed = ["tileWidth", "tileHeight", "tileAlignment"]
 
@@ -227,6 +228,17 @@ export class Visual implements IVisual {
                     }, {})
 
                 properties = { ...properties, ...filtered }
+                break
+            }
+            case "contentAlignment": {
+                properties.state = settings.contentAlignment.state
+                properties.hoverStyling = settings.contentAlignment.hoverStyling
+                let filtered = Object.keys(settings.contentAlignment)
+                    .reduce((obj, key) => {
+                        obj[key] = settings.contentAlignment[key]
+                        return obj;
+                    }, {})
+                properties = { ...properties, ...this.getEnumeratedStateProperties(filtered) }
                 break
             }
             case "effect":
@@ -269,23 +281,19 @@ export class Visual implements IVisual {
             this.host.persistProperties(objects);
 
 
-        let cardsCollection = new CardsCollection()
 
-        cardsCollection.formatSettings.icon = this.visualSettings.icon
-        cardsCollection.formatSettings.layout = this.visualSettings.layout
-        cardsCollection.formatSettings.effect = this.visualSettings.effect
-
-
-        cardsCollection.svg = this.svg
-        cardsCollection.container = this.container
-        cardsCollection.viewport = {
-            height: options.viewport.height,
-            width: options.viewport.width,
-        }
-        cardsCollection.visual = this
-        cardsCollection.options = options
-        cardsCollection.visualElement = this.visualElement
-        
+            this.cardsCollection.formatSettings.icon = this.visualSettings.icon
+            this.cardsCollection.formatSettings.layout = this.visualSettings.layout
+            this.cardsCollection.formatSettings.contentAlignment = this.visualSettings.contentAlignment
+            this.cardsCollection.formatSettings.effect = this.visualSettings.effect
+    
+    
+            this.cardsCollection.viewport = {
+                height: options.viewport.height,
+                width: options.viewport.width,
+            }
+    
+            
 
         
         let dataView = this.options.dataViews[0]
@@ -295,10 +303,15 @@ export class Visual implements IVisual {
         if (categories) {
             this.visualSettings.layout.tileLayout = TileLayoutType.grid
             this.visualSettings.layout.tilesPerRow = measures.length + 1
-            cardsCollection.hasCategory = true
+            this.cardsCollection.hasCategory = true
         }
 
-        cardsCollection.render(this.createCardData())
+        if (options.type == VisualUpdateType.Resize || options.type == VisualUpdateType.ResizeEnd) {
+            this.cardsCollection.onResize()
+        } else {
+            if (objects.merge.length == 0)
+                this.cardsCollection.onDataChange(this.createCardData())
+        }
     }
 
     public createCardData(): CardData[] {
@@ -328,6 +341,7 @@ export class Visual implements IVisual {
 
                         cardData[j * (measures.length + 1)] = {
                             text: categories[0].values[j].toString(),
+                            contentFormatType: ContentFormatType.text,
                             selectionId: categoryInstanceSelectionIds[j],
                             get isSelected(): boolean {
                                 return this.selectionId &&

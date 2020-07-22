@@ -3,16 +3,22 @@ import { TileData } from './TileData'
 import { Viewport } from './interfaces';
 import { TileLayoutType, State, TileSizingType } from './enums';
 import { getMatchingStateProperty, calculateWordDimensions } from './functions'
+import { TilesCollection } from './TilesCollection';
 export class UniversalTileData{
     tilesData: TileData[]
     formatSettings: FormatSettings;
-    constructor(tilesData: TileData[], formatSettings: FormatSettings) {
+    collection: TilesCollection;
+    constructor(tilesData: TileData[], formatSettings: FormatSettings, collection: TilesCollection) {
         this.tilesData = tilesData;
         this.formatSettings = formatSettings;
+        this.collection = collection;
     }
 
     public scrollLeft: number = 0;
     public scrollTop: number = 0;
+    public maxBoundedTextHeight: number;
+    public maxBoundedText2Height: number;
+    public maxIconHeight: number; 
 
     public viewport: Viewport = {
         height: 0,
@@ -50,13 +56,15 @@ export class UniversalTileData{
     }
 
 
+
     getMaxOfPropertyGroup(formatObj: any, propBase: string): number{
-        return Math.max(
+        let max = Math.max(
             getMatchingStateProperty(State.selected, formatObj, propBase),
             getMatchingStateProperty(State.unselected, formatObj, propBase),
             getMatchingStateProperty(State.hovered, formatObj, propBase),
             getMatchingStateProperty(State.disabled, formatObj, propBase),
         )
+        return max == undefined ? formatObj[propBase + 'D'] || 0 : max
     }
 
 
@@ -67,11 +75,18 @@ export class UniversalTileData{
     get maxFontSize(): number{
         return this.getMaxOfPropertyGroup(this.formatSettings.text, 'fontSize')
     }
+    get maxFont2Size(): number{
+        return this.maxFontSize
+    }
     get maxInlineTextHeight(): number {
         return Math.round(this.maxFontSize*4/3)
     }
     get minTileWidth(): number{
         return this.maxFontSize*5
+    }
+
+    get maxIconWidth(): number {
+        return this.getMaxOfPropertyGroup(this.formatSettings.icon, 'width')
     }
 
 
