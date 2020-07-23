@@ -9,6 +9,11 @@
             "displayName": "Measures",
             "name": "measures",
             "kind": "Measure"
+        },
+        {
+            "displayName": "Icons",
+            "name": "icons",
+            "kind": "Grouping"
         }
     ],
     "objects": {
@@ -529,7 +534,7 @@
             }
         },
         "headerTile": {
-            "displayName": "Category Tiles",
+            "displayName": "Header Tiles",
             "properties": {
                 "state": {
                     "displayName": "State",
@@ -710,8 +715,15 @@
         },
 
         "headerText": {
-            "displayName": "Header",
+            "displayName": "Header Text",
             "properties": {
+                "show": {
+                    "displayName": "Show icons",
+                    "description": "Add an icon to each tile",
+                    "type": {
+                        "bool": true
+                    }
+                },
                 "state": {
                     "displayName": "State",
                     "description": "What state to apply the styles to",
@@ -881,8 +893,8 @@
         "icon": {
             "displayName": "Icons",
             "properties": {
-                "icons": {
-                    "displayName": "Icons",
+                "show": {
+                    "displayName": "Show icons",
                     "description": "Add an icon to each tile",
                     "type": {
                         "bool": true
@@ -2016,6 +2028,11 @@
                         {
                             "for": {
                                 "in": "category"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "icons"
                             }
                         }
                     ]

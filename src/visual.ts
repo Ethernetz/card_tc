@@ -83,7 +83,7 @@ export class Visual implements IVisual {
 
     public visualElement: HTMLElement;
 
-    public selectionIdKeys: string [] = []
+    public selectionIdKeys: string[] = []
 
     public cardsCollection: CardsCollection
 
@@ -93,7 +93,7 @@ export class Visual implements IVisual {
         this.selectionManagerUnbound = new SelectionManagerUnbound()
         this.selectionManagerHover = options.host.createSelectionManager();
         this.host = options.host;
-        
+
         this.svg = d3.select(options.element)
             .append('svg')
             .classed('buttonstrip', true);
@@ -152,15 +152,15 @@ export class Visual implements IVisual {
             case "measureTile":
                 properties.state = settings.measureTile.state
                 properties.hoverStyling = settings.measureTile.hoverStyling
-                properties = {...properties, ...this.getEnumeratedStateProperties(settings.measureTile) }
+                properties = { ...properties, ...this.getEnumeratedStateProperties(settings.measureTile) }
                 break
             case "headerTile":
                 properties.state = settings.headerTile.state
                 properties.hoverStyling = settings.headerTile.hoverStyling
-                properties = {...properties, ...this.getEnumeratedStateProperties(settings.headerTile) }
+                properties = { ...properties, ...this.getEnumeratedStateProperties(settings.headerTile) }
                 break
             case "categoryLabelText": {
-        
+
                 properties.show = settings.categoryLabelText.show
                 properties.state = settings.categoryLabelText.state
                 properties.hoverStyling = settings.categoryLabelText.hoverStyling
@@ -199,7 +199,7 @@ export class Visual implements IVisual {
                 properties = { ...properties, ...this.getEnumeratedStateProperties(filtered) }
                 break
             }
-            case "icon":{
+            case "icon": {
                 properties.show = settings.icon.show
                 properties.state = settings.icon.state
                 properties.hoverStyling = settings.icon.hoverStyling
@@ -282,20 +282,20 @@ export class Visual implements IVisual {
 
 
 
-            this.cardsCollection.formatSettings.icon = this.visualSettings.icon
-            this.cardsCollection.formatSettings.layout = this.visualSettings.layout
-            this.cardsCollection.formatSettings.contentAlignment = this.visualSettings.contentAlignment
-            this.cardsCollection.formatSettings.effect = this.visualSettings.effect
-    
-    
-            this.cardsCollection.viewport = {
-                height: options.viewport.height,
-                width: options.viewport.width,
-            }
-    
-            
+        this.cardsCollection.formatSettings.icon = this.visualSettings.icon
+        this.cardsCollection.formatSettings.layout = this.visualSettings.layout
+        this.cardsCollection.formatSettings.contentAlignment = this.visualSettings.contentAlignment
+        this.cardsCollection.formatSettings.effect = this.visualSettings.effect
 
-        
+
+        this.cardsCollection.viewport = {
+            height: options.viewport.height,
+            width: options.viewport.width,
+        }
+
+
+
+
         let dataView = this.options.dataViews[0]
         let allCategories: powerbi.DataViewCategoryColumn[] = dataView.categorical.categories;
         let measures: powerbi.DataViewValueColumn[] = dataView.categorical.values
@@ -316,32 +316,45 @@ export class Visual implements IVisual {
 
     public createCardData(): CardData[] {
 
-        
+
 
         let cardData: CardData[] = []
 
         let dataView = this.options.dataViews[0]
-        let categories: powerbi.DataViewCategoryColumn[] = dataView.categorical.categories;
+        let allCategories: powerbi.DataViewCategoryColumn[] = dataView.categorical.categories;
+        
         let measures: powerbi.DataViewValueColumn[] = dataView.categorical.values
         let selectionIdKeys: string[] = (this.selectionManager.getSelectionIds() as powerbi.visuals.ISelectionId[]).map(x => x.getKey()) as string[]
-        if(selectionIdKeys.indexOf(undefined) == -1)
+        if (selectionIdKeys.indexOf(undefined) == -1)
             this.selectionIdKeys = selectionIdKeys
 
         let categoryInstanceSelectionIds: powerbi.visuals.ISelectionId[] = []
-
         for (let i = 0; i < measures.length; i++) {
             let iValueFormatter = valueFormatter.create({ format: measures[i].source.format });
-            if (categories) {
-                for (let j = 0; j < categories[0].values.length; j++) {
+            if (allCategories) {
+                let categories = allCategories[0]
+                let headerContentFormatType = ContentFormatType.empty
+                if (this.visualSettings.headerText.show && !this.visualSettings.icon.show)
+                    headerContentFormatType = ContentFormatType.text
+                if (!this.visualSettings.headerText.show && this.visualSettings.icon.show)
+                    headerContentFormatType = ContentFormatType.icon
+                if (this.visualSettings.headerText.show && this.visualSettings.icon.show)
+                    headerContentFormatType = ContentFormatType.text_icon
+                console.log(headerContentFormatType)
+
+
+                for (let j = 0; j < categories.values.length; j++) {
                     if (i == 0) {
                         let categoryInstanceId = this.host.createSelectionIdBuilder()
-                            .withCategory(categories[0], j)
+                            .withCategory(categories, j)
                             .createSelectionId();
                         categoryInstanceSelectionIds[j] = categoryInstanceId
-
+                        let iconURL: string = allCategories[1] ? allCategories[1].values[j].toString() : "";
+                        console.log(iconURL)
                         cardData[j * (measures.length + 1)] = {
-                            text: categories[0].values[j].toString(),
-                            contentFormatType: ContentFormatType.text,
+                            text: categories.values[j].toString(),
+                            iconURL: this.visualSettings.icon.show ? iconURL : "",
+                            contentFormatType: headerContentFormatType,
                             selectionId: categoryInstanceSelectionIds[j],
                             get isSelected(): boolean {
                                 return this.selectionId &&
