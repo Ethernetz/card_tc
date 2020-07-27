@@ -7,14 +7,12 @@ import { TilesCollection } from "./TilesCollection/TilesCollection";
 import { Tile } from "./TilesCollection/Tile";
 import powerbi from "powerbi-visuals-api";
 import { TileData } from "./TilesCollection/TileData";
-import * as d3 from "d3";
 import { getMatchingStateProperty, calculateWordDimensions } from "./TilesCollection/functions";
 import { ContentFormatType } from "./TilesCollection/enums";
 import { VisualSettings } from "./settings";
 import { UniversalTileData } from "./TilesCollection/UniversalTileData";
-import { TileSettings, TextSettings } from "./TilesCollection/FormatSettings";
+import { TextSettings, TileFillSettings, TileStrokeSettings } from "./TilesCollection/FormatSettings";
 
-// import { sizeTextContainer, styleText, makeTextTransparent } from './d3calls'
 
 export class CardsCollection extends TilesCollection {
     visual: Visual
@@ -157,10 +155,15 @@ export class Card extends Tile {
     }
 
 
-    get tileSettings(): TileSettings{
+    get tileFillSettings(): TileFillSettings{
         if(this.contentFormatType == ContentFormatType.text_text2)
-            return this.vs.measureTile
-        return this.vs.headerTile
+            return this.vs.measureTileFill
+        return this.vs.headerTileFill
+    }
+    get tileStrokeSettings(): TileStrokeSettings{
+        if(this.contentFormatType == ContentFormatType.text_text2)
+            return this.vs.measureTileStroke
+        return this.vs.measureTileStroke
     }
 
     get textSettings(): TextSettings{

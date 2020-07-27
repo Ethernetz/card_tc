@@ -49,23 +49,19 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils"
 
 import * as d3 from "d3";
-// import { ProcessedVisualSettings } from "./processedvisualsettings";
 
 import { PropertyGroupKeys } from './TilesCollection/interfaces'
 import { getPropertyStateNameArr, getObjectsToPersist } from './TilesCollectionUtlities/functions'
-import { getCorrectPropertyStateName } from './TilesCollection/functions'
 import { SelectionManagerUnbound } from './SelectionManagerUnbound'
 
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
-// import * as enums from "./enums"
 import { TileSizingType, TileLayoutType, TileShape, IconPlacement, State } from './TilesCollection/enums'
 
 import { CardsCollection, CardData } from './CardsCollection'
 import { ContentFormatType } from "./TilesCollection/enums";
 
 export class Visual implements IVisual {
-    private target: HTMLElement;
     public selectionManager: ISelectionManager;
     public selectionManagerUnbound: SelectionManagerUnbound
     private selectionManagerHover: ISelectionManager;
@@ -115,7 +111,7 @@ export class Visual implements IVisual {
             let state: State = propertyGroup["state"]
             for (let i = 0; i < groupedKeyNamesArr.length; i++) {
                 let groupedKeyNames = groupedKeyNamesArr[i]
-                if (prefix && !groupedKeyNames.default.startsWith(prefix))
+                if (prefix && (!groupedKeyNames.default || !groupedKeyNames.default.startsWith(prefix)))
                     continue
                 switch (state) {
                     case State.all:
@@ -149,18 +145,27 @@ export class Visual implements IVisual {
 
         const settings: VisualSettings = this.visualSettings || <VisualSettings>VisualSettings.getDefault();
         switch (objectName) {
-            case "measureTile":
-                properties.state = settings.measureTile.state
-                properties.hoverStyling = settings.measureTile.hoverStyling
-                properties = { ...properties, ...this.getEnumeratedStateProperties(settings.measureTile) }
+            case "measureTileFill":
+                properties.state = settings.measureTileFill.state
+                properties.hoverStyling = settings.measureTileFill.hoverStyling
+                properties = { ...properties, ...this.getEnumeratedStateProperties(settings.measureTileFill) }
                 break
-            case "headerTile":
-                properties.state = settings.headerTile.state
-                properties.hoverStyling = settings.headerTile.hoverStyling
-                properties = { ...properties, ...this.getEnumeratedStateProperties(settings.headerTile) }
+            case "measureTileStroke":
+                properties.state = settings.measureTileStroke.state
+                properties.hoverStyling = settings.measureTileStroke.hoverStyling
+                properties = { ...properties, ...this.getEnumeratedStateProperties(settings.measureTileStroke) }
+                break
+            case "headerTileFill":
+                properties.state = settings.headerTileFill.state
+                properties.hoverStyling = settings.headerTileFill.hoverStyling
+                properties = { ...properties, ...this.getEnumeratedStateProperties(settings.headerTileFill) }
+                break
+            case "headerTileStroke":
+                properties.state = settings.headerTileStroke.state
+                properties.hoverStyling = settings.headerTileStroke.hoverStyling
+                properties = { ...properties, ...this.getEnumeratedStateProperties(settings.headerTileStroke) }
                 break
             case "categoryLabelText": {
-
                 properties.show = settings.categoryLabelText.show
                 properties.state = settings.categoryLabelText.state
                 properties.hoverStyling = settings.categoryLabelText.hoverStyling
@@ -213,13 +218,20 @@ export class Visual implements IVisual {
                 properties = { ...properties, ...this.getEnumeratedStateProperties(filtered) }
                 break
             }
+            case "shape": {
+                let filtered = Object.keys(settings.shape)
+                    .filter(key => !(key.endsWith("Angle") || key.endsWith("Length"))
+                        || key == settings.shape.tileShape + "Angle"
+                        || key == settings.shape.tileShape + "Length")
+                    .reduce((obj, key) => {
+                        obj[key] = settings.shape[key]
+                        return obj;
+                    }, {})
+                properties = { ...properties, ...filtered }
+            }
             case "layout": {
                 let excludeWhenNotFixed = ["tileWidth", "tileHeight", "tileAlignment"]
-
                 let filtered = Object.keys(settings.layout)
-                    .filter(key => !(key.endsWith("Angle") || key.endsWith("Length"))
-                        || key == settings.layout.tileShape + "Angle"
-                        || key == settings.layout.tileShape + "Length")
                     .filter(key => !(settings.layout.sizingMethod != TileSizingType.fixed && excludeWhenNotFixed.indexOf(key) > -1))
                     .filter(key => !(settings.layout.tileLayout != TileLayoutType.grid && key == "tilesPerRow"))
                     .reduce((obj, key) => {
@@ -241,10 +253,15 @@ export class Visual implements IVisual {
                 properties = { ...properties, ...this.getEnumeratedStateProperties(filtered) }
                 break
             }
-            case "effect":
+            case "effect": {
                 properties.shapeRoundedCornerRadius = settings.effect.shapeRoundedCornerRadius
                 properties.state = settings.effect.state
                 properties.hoverStyling = settings.effect.hoverStyling
+                properties.gradient = settings.effect.gradient
+                if (settings.effect.gradient) {
+                    properties.reverseGradient = settings.effect.reverseGradient
+                    properties = { ...properties, ...this.getEnumeratedStateProperties(settings.effect, "gradient") }
+                }
                 properties.shadow = settings.effect.shadow
                 if (settings.effect.shadow)
                     properties = { ...properties, ...this.getEnumeratedStateProperties(settings.effect, "shadow") }
@@ -252,9 +269,7 @@ export class Visual implements IVisual {
                 if (settings.effect.glow)
                     properties = { ...properties, ...this.getEnumeratedStateProperties(settings.effect, "glow") }
                 break
-            case "content":
-                properties = { ...properties, ...settings.content }
-                break
+            }
         }
 
         objectEnumeration.push({
@@ -321,52 +336,47 @@ export class Visual implements IVisual {
         let cardData: CardData[] = []
 
         let dataView = this.options.dataViews[0]
+        let allCategoryRoles = dataView.metadata.columns.map((d)=>Object.keys(d.roles)[0])
         let allCategories: powerbi.DataViewCategoryColumn[] = dataView.categorical.categories;
-        
-        let measures: powerbi.DataViewValueColumn[] = dataView.categorical.values
+        let categoriesI = 0
+        let textCategory = allCategoryRoles.indexOf("category") > -1 ? allCategories[categoriesI++] : null
+        let iconURLCategory = allCategoryRoles.indexOf("icon") > -1 ? allCategories[categoriesI++] : null
+
+        let fields: powerbi.DataViewValueColumn[] = dataView.categorical.values
         let selectionIdKeys: string[] = (this.selectionManager.getSelectionIds() as powerbi.visuals.ISelectionId[]).map(x => x.getKey()) as string[]
         if (selectionIdKeys.indexOf(undefined) == -1)
             this.selectionIdKeys = selectionIdKeys
 
         let categoryInstanceSelectionIds: powerbi.visuals.ISelectionId[] = []
-        for (let i = 0; i < measures.length; i++) {
-            let iValueFormatter = valueFormatter.create({ format: measures[i].source.format });
+        for (let i = 0; i < fields.length; i++) {
+            let iValueFormatter = valueFormatter.create({ format: fields[i].source.format });
             if (allCategories) {
-                let categories = allCategories[0]
-                let headerContentFormatType = ContentFormatType.empty
-                if (this.visualSettings.headerText.show && !this.visualSettings.icon.show)
-                    headerContentFormatType = ContentFormatType.text
-                if (!this.visualSettings.headerText.show && this.visualSettings.icon.show)
-                    headerContentFormatType = ContentFormatType.icon
-                if (this.visualSettings.headerText.show && this.visualSettings.icon.show)
-                    headerContentFormatType = ContentFormatType.text_icon
-                console.log(headerContentFormatType)
-
-
-                for (let j = 0; j < categories.values.length; j++) {
+                let n = Math.max(textCategory && textCategory.values.length, 
+                    iconURLCategory && iconURLCategory.values.length,
+                    0)
+                for (let j = 0; j < n; j++) {
                     if (i == 0) {
                         let categoryInstanceId = this.host.createSelectionIdBuilder()
-                            .withCategory(categories, j)
+                            .withCategory(textCategory, j)
                             .createSelectionId();
                         categoryInstanceSelectionIds[j] = categoryInstanceId
                         let iconURL: string = allCategories[1] ? allCategories[1].values[j].toString() : "";
                         console.log(iconURL)
-                        cardData[j * (measures.length + 1)] = {
-                            text: categories.values[j].toString(),
-                            iconURL: this.visualSettings.icon.show ? iconURL : "",
-                            contentFormatType: headerContentFormatType,
+                        cardData[j * (fields.length + 1)] = {
+                            text: this.visualSettings.headerText.show && textCategory ? textCategory.values[j].toString() : null,
+                            iconURL: this.visualSettings.icon.show && iconURLCategory ? iconURLCategory.values[j].toString() : null,
                             selectionId: categoryInstanceSelectionIds[j],
                             get isSelected(): boolean {
                                 return this.selectionId &&
                                     selectionIdKeys &&
                                     selectionIdKeys.indexOf(this.selectionId.getKey() as string) > -1
                             },
-                            isHovered: this.hoveredIndex == j * (measures.length + 1),
+                            isHovered: this.hoveredIndex == j * (fields.length + 1),
                         }
                     }
-                    cardData[j * (measures.length + 1) + i + 1] = {
-                        text: measures[i].source.displayName,
-                        text2: iValueFormatter.format(measures[i].values[j]),
+                    cardData[j * (fields.length + 1) + i + 1] = {
+                        text: fields[i].source.displayName,
+                        text2: iValueFormatter.format(fields[i].values[j]),
                         contentFormatType: ContentFormatType.text_text2,
                         selectionId: categoryInstanceSelectionIds[j],
                         get isSelected(): boolean {
@@ -374,13 +384,13 @@ export class Visual implements IVisual {
                                 selectionIdKeys &&
                                 selectionIdKeys.indexOf(this.selectionId.getKey() as string) > -1
                         },
-                        isHovered: this.hoveredIndex == j * (measures.length + 1) + i + 1
+                        isHovered: this.hoveredIndex == j * (fields.length + 1) + i + 1
                     }
                 }
             } else {
                 cardData[i] = {
-                    text: measures[i].source.displayName,
-                    text2: iValueFormatter.format(measures[i].values[0]),
+                    text: fields[i].source.displayName,
+                    text2: iValueFormatter.format(fields[i].values[0]),
                     contentFormatType: ContentFormatType.text_text2,
                     isHovered: this.hoveredIndex == i,
                     isSelected: this.selectionManagerUnbound.getSelectionIndexes().indexOf(i) > -1,

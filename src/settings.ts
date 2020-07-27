@@ -30,13 +30,19 @@ import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
 import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 import * as TileCollectionFormatSettings from "./TilesCollection/FormatSettings"
 
-export class MeasureTileSettings extends TileCollectionFormatSettings.TileSettings{
+export class MeasureTileFillSettings extends TileCollectionFormatSettings.TileFillSettings{
     public colorD: string = "#fff";
 }
+export class MeasureTileStrokeSettings extends TileCollectionFormatSettings.TileStrokeSettings{
+}
 
-export class HeaderTileSettings extends TileCollectionFormatSettings.TileSettings{
+
+export class HeaderTileFillSettings extends TileCollectionFormatSettings.TileFillSettings{
   public colorD: string = "#fff";
 }
+export class HeaderTileStrokeSettings extends TileCollectionFormatSettings.TileStrokeSettings{
+}
+
 
 export class HeaderTextSettings extends TileCollectionFormatSettings.TextSettings{
     public colorD: string = "#252423";
@@ -56,6 +62,9 @@ export class DataLabelTextSettings extends TileCollectionFormatSettings.TextSett
 export class IconSettings extends TileCollectionFormatSettings.IconSettings{
 }
 
+export class ShapeSettings extends TileCollectionFormatSettings.ShapeSettings{
+}
+
 export class LayoutSettings extends TileCollectionFormatSettings.LayoutSettings{
 }
 
@@ -70,16 +79,19 @@ export class ContentSettings{
 }
 
 export class VisualSettings extends DataViewObjectsParser {
-  public measureTile: MeasureTileSettings = new MeasureTileSettings();
+  public measureTileFill: MeasureTileFillSettings = new MeasureTileFillSettings();
+  public measureTileStroke: MeasureTileStrokeSettings = new MeasureTileStrokeSettings()
   public categoryLabelText: CategoryLabelTextSettings = new CategoryLabelTextSettings();
   public dataLabelText: DataLabelTextSettings = new DataLabelTextSettings();
   
-  public headerTile: HeaderTileSettings = new HeaderTileSettings();
+  public headerTileFill: HeaderTileFillSettings = new HeaderTileFillSettings();
+  public headerTileStroke: HeaderTileStrokeSettings = new HeaderTileStrokeSettings();
   public headerText: HeaderTextSettings = new HeaderTextSettings();
 
   public icon: IconSettings = new IconSettings();
+  public shape: ShapeSettings = new ShapeSettings();
   public layout: LayoutSettings = new LayoutSettings();
+  public content: ContentSettings = new ContentSettings();
   public contentAlignment: ContentAlignmentSettings = new ContentAlignmentSettings();
   public effect: EffectSettings = new EffectSettings();
-  public content: ContentSettings = new ContentSettings();
 }
